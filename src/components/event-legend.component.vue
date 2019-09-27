@@ -36,7 +36,8 @@ export default {
       width: 1.4rem;
       height: 1.4rem;
       margin-right: 0.5rem;
-      background-color: $purple;
+      background-color: $blue;
+      border-radius: $rounded-corners;
     }
   }
 
@@ -48,7 +49,7 @@ export default {
       width: 1.4rem;
       height: 1.4rem;
       margin-right: 0.5rem;
-      background-color: $blue;
+      background-color: $purple;
     }
   }
 }

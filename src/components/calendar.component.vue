@@ -2,6 +2,13 @@
   <div class="calendar">
     <event-legend />
 
+    <span class="calendar__create-event"
+          @click="openPanel">
+      create event
+    </span>
+
+    <creation-panel />
+
     <div class="calendar__month-switcher">
       <img class="month-switcher__button"
            src="@/assets/icons/left-arrow/left-arrow.svg"
@@ -49,13 +56,15 @@
 </template>
 
 <script>
-import moment      from 'moment';
-import EventLegend from './event-legend.component.vue';
+import moment        from 'moment';
+import EventLegend   from './event-legend.component.vue';
+import CreationPanel from './creation-panel.component.vue';
 
 export default {
   name: 'calendar',
   components: {
     EventLegend,
+    CreationPanel,
   },
   data() {
     return {
@@ -150,6 +159,9 @@ export default {
         day,
       });
     },
+    openPanel() {
+      this.$store.state.isPanelVisible = true;
+    },
   },
 };
 </script>
@@ -161,12 +173,37 @@ export default {
   padding: 1rem;
   background-color: $white;
   box-shadow: $box-shadow;
+  overflow: hidden;
   position: relative;
 
   .event-legend {
     position: absolute;
     top: 1rem;
     left: 1rem;
+  }
+
+  &__create-event {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: .3s;
+
+    &:hover {
+      color: $mint;
+    }
+  }
+
+  .creation-panel {
+    position: absolute;
+    top: 0;
+    right: -32rem;
+    transition: .5s ease-in-out;;
+
+    &--visible {
+      right: 0
+    }
   }
 
   &__month-switcher {
@@ -225,7 +262,7 @@ export default {
     &--current-day {
       position: relative;
 
-      &::after {
+      &::before {
         content: "";
         display: block;
         width: 0;
@@ -240,12 +277,27 @@ export default {
     }
 
     &--event-day {
-      background-color: $purple;
+      position: relative;
+      background-color: $blue;
       color: $white;
+
+      &::after {
+        content: '';
+        display: block;
+        width: 1.2rem;
+        height: 1.2rem;
+        border-radius: $rounded-corners;
+        background-color: $blue;
+        color: $white;
+        position: absolute;
+        bottom: 0.5rem;
+        right: 0.5rem;
+        z-index: 1;
+      }
     }
 
     &--long-event-day {
-      background-color: $blue;
+      background-color: $purple;
       color: $white;
     }
 

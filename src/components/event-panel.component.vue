@@ -26,7 +26,13 @@
           {{ event.name }}
         </h2>
 
-        <div class="underline"></div>
+        <div class="single-event-underline"
+             v-if="event.date">
+        </div>
+
+        <div class="long-event-underline"
+             v-else>
+        </div>
 
         <p class="event-details__event-description">
           {{ event.description }}
@@ -149,10 +155,18 @@ export default {
       }
     }
 
-    .underline {
+    .single-event-underline,
+    .long-event-underline {
       margin: 0.5rem 0 2rem;
       height: 0.6rem;
       width: 100%;
+    }
+
+    .single-event-underline {
+      background-color: $blue;
+    }
+
+    .long-event-underline {
       background-color: $purple;
     }
 
@@ -163,10 +177,6 @@ export default {
       right: 0.8rem;
       cursor: pointer;
       transition: .3s;
-
-      &:hover {
-        color: $purple;
-      }
     }
   }
 
