@@ -44,6 +44,7 @@
         </span>
       </div>
     </div>
+
     <div class="event-panel__no-events"
          v-else>
 

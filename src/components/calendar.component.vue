@@ -35,19 +35,21 @@
           v-for="day in includePrevMonth">
 
       </li>
-      <li class="calendar__current-month-day"
+      <li class="calendar__current-month"
           v-for="day in daysInMonth"
-          :class="{'calendar__current-month-day--current-day': markToday(day),
-                   'calendar__current-month-day--event-day': markSingleEvent(day),
-                   'calendar__current-month-day--long-event-day': markLongEvent(day),
-                   'calendar__current-month-day--selected-day': markSelectedField(day)}"
+          :class="{'calendar__current-month--current-day': markToday(day),
+                   'calendar__current-month--event-day': markSingleEvent(day),
+                   'calendar__current-month--long-event-day': markLongEvent(day),
+                   'calendar__current-month--selected-day': markSelectedField(day)}"
 
           @click="selectField(day)">
 
         {{ day }}
       </li>
-      <li class="calendar__another-month-day"
-          v-for="day in includeNextMonth">
+      <li class="calendar__current-month"
+          v-for="day in includeNextMonth"
+          :class="{'calendar__current-month--grayed-out': true,
+                   'calendar__current-month--long-event-day': markLongEvent2(day)}">
 
         {{ day }}
       </li>
@@ -98,7 +100,7 @@ export default {
       return this.dateContext.format('Y');
     },
     month() {
-      return this.dateContext.format('MMMM');
+      return this.dateContext.format('MM');
     },
     date() {
       return this.dateContext.get('date');
@@ -140,6 +142,13 @@ export default {
     markLongEvent(day) {
       const { events } = this.$store.state;
       const fullDate = `${this.year}-${this.month}-${day}`;
+      const fieldEvents = events.filter(event => moment(fullDate)
+        .isBetween(event.dateStart, event.dateEnd));
+      return fieldEvents.length;
+    },
+    markLongEvent2(day) {
+      const { events } = this.$store.state;
+      const fullDate = `${this.year}-${parseInt(this.month, 10) + 1}-${day}`;
       const fieldEvents = events.filter(event => moment(fullDate)
         .isBetween(event.dateStart, event.dateEnd));
       return fieldEvents.length;
@@ -236,7 +245,7 @@ export default {
 
   &__weekday-name,
   &__another-month-day,
-  &__current-month-day {
+  &__current-month {
     height: 5rem;
     display: flex;
     justify-content: center;
@@ -256,7 +265,7 @@ export default {
     margin: 0.25rem;
   }
 
-  &__current-month-day {
+  &__current-month {
     margin: 0.25rem;
 
     &--current-day {
@@ -296,11 +305,6 @@ export default {
       }
     }
 
-    &--long-event-day {
-      background-color: $purple;
-      color: $white;
-    }
-
     &:hover {
       border: 3px solid $mint;
       cursor: pointer;
@@ -308,6 +312,17 @@ export default {
 
     &--selected-day {
       border: 3px solid $mint;
+    }
+
+    &--grayed-out {
+      opacity: 0.4;
+      margin: 0.25rem;
+      background-color: $grey-300;
+    }
+
+    &--long-event-day {
+      background-color: $purple;
+      color: $white;
     }
   }
 }

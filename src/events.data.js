@@ -48,7 +48,7 @@ export default [
     date: '2019-09-27',
   },
   {
-    id: 8,
+    id: 9,
     name: 'Long Event',
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     dateStart: '2019-09-28',
