@@ -17,10 +17,20 @@
     <input class="creation-panel__event-datepicker"
            type="date">
 
-    <span class="creation-panel__close"
-          @click="closePanel">
-      close panel
-    </span>
+    <div class="creation-panel__button-wrapper">
+      <button class="creation-panel__create">
+        Create
+      </button>
+
+      <button class="creation-panel__clear">
+        Clear
+      </button>
+
+      <button class="creation-panel__close"
+              @click="closePanel">
+        Close
+      </button>
+    </div>
   </div>
 </template>
 
@@ -82,16 +92,42 @@ export default {
     min-height: 20rem;
   }
 
+  &__create,
+  &__clear,
   &__close {
-    position: absolute;
-    bottom: 1rem;
-    left: 1rem;
-    font-size: 2rem;
+    font-size: 1.4rem;
+    letter-spacing: $primary-spacing;
+    background-color: $white;
+    color: $blue;
+    border: 2px solid $blue;
+    padding: 0.8rem 1.4rem;
     cursor: pointer;
-    transition: .3s;
+    transition: .5s;
 
     &:hover {
-      color: $blue;
+      background-color: $blue;
+      color: $white;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &__button-wrapper {
+    margin-top: 2rem;
+
+    :first-child {
+      border-radius: 0.5rem 0 0 0.5rem;
+    }
+
+    :nth-child(2) {
+      border-left: none;
+      border-right: none;
+    }
+
+    :last-child {
+      border-radius: 0 0.5rem 0.5rem 0;
     }
   }
 }
