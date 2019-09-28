@@ -8,22 +8,28 @@
 
     <input class="creation-panel__event-name"
            type="text"
-           placeholder="Event Name">
+           placeholder="Event Name"
+           v-model="name">
 
     <textarea class="creation-panel__event-description"
-              placeholder="Event Description">
+              placeholder="Event Description"
+              v-model="description">
     </textarea>
 
     <input class="creation-panel__event-datepicker"
-           type="date">
+           type="date"
+           v-model="date">
+
+    <span class="creation-panel__message"
+          :class="{'creation-panel__message--success': isSuccess,
+                   'creation-panel__message--warning': isWarning}">
+      {{ message }}
+    </span>
 
     <div class="creation-panel__button-wrapper">
-      <button class="creation-panel__create">
+      <button class="creation-panel__create"
+              @click="createEvent">
         Create
-      </button>
-
-      <button class="creation-panel__clear">
-        Clear
       </button>
 
       <button class="creation-panel__close"
@@ -40,6 +46,12 @@ export default {
   data() {
     return {
       isVisible: false,
+      message: '',
+      isSuccess: false,
+      isWarning: false,
+      name: '',
+      description: '',
+      date: '',
     };
   },
   computed: {
@@ -50,6 +62,29 @@ export default {
   methods: {
     closePanel() {
       this.$store.state.isPanelVisible = false;
+      this.message = '';
+    },
+    createEvent() {
+      if (this.name && this.date) {
+        const idList = this.$store.state.events.map(event => event.id);
+        const event = {
+          id: Math.max.apply(null, idList) + 1,
+          name: this.name,
+          description: this.description,
+          date: this.date,
+        };
+        this.$store.state.events.push(event);
+        this.message = 'Event has been created successfully';
+        this.isWarning = false;
+        this.isSuccess = true;
+      } else {
+        this.message = 'Complete the missing fields';
+        this.isWarning = true;
+        this.isSuccess = false;
+      }
+      this.name = '';
+      this.description = '';
+      this.date = '';
     },
   },
 };
@@ -92,8 +127,19 @@ export default {
     min-height: 20rem;
   }
 
+  &__message {
+    font-size: 1.4rem;
+
+    &--success {
+      color: #2ECC40;
+    }
+
+    &--warning {
+      color: #FF4136;
+    }
+  }
+
   &__create,
-  &__clear,
   &__close {
     font-size: 1.4rem;
     letter-spacing: $primary-spacing;
@@ -121,12 +167,8 @@ export default {
       border-radius: 0.5rem 0 0 0.5rem;
     }
 
-    :nth-child(2) {
-      border-left: none;
-      border-right: none;
-    }
-
     :last-child {
+      border-left: none;
       border-radius: 0 0.5rem 0.5rem 0;
     }
   }

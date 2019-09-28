@@ -142,6 +142,7 @@ export default {
     flex-direction: column;
     justify-content: center;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    word-break: break-all;
     position: relative;
 
     .event-details {
