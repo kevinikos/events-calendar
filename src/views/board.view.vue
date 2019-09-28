@@ -38,6 +38,10 @@ export default {
     .calendar,
     .event-panel {
       margin-top: 10rem;
+
+      @media (max-width: $break-large) {
+        margin-top: 5rem;
+      }
     }
   }
 }
