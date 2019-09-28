@@ -13,16 +13,16 @@
       <img class="month-switcher__button"
            src="@/assets/icons/left-arrow/left-arrow.svg"
            alt="left arrow"
-           @click="previousMonth">
+           @click="switchToPrevMonth">
 
       <span class="month-switcher__current-date">
-        {{ month }} {{ year }}
+        {{ monthName }} {{ year }}
       </span>
 
       <img class="month-switcher__button"
            src="@/assets/icons/right-arrow/right-arrow.svg"
            alt="right arrow"
-           @click="nextMonth">
+           @click="switchToNextMonth">
 
     </div>
     <ul class="calendar__fields">
@@ -31,25 +31,38 @@
 
         {{ weekday }}
       </li>
-      <li class="calendar__another-month-day"
-          v-for="day in includePrevMonth">
 
-      </li>
       <li class="calendar__current-month"
-          v-for="day in daysInMonth"
-          :class="{'calendar__current-month--current-day': markToday(day),
-                   'calendar__current-month--event-day': markSingleEvent(day),
-                   'calendar__current-month--long-event-day': markLongEvent(day),
-                   'calendar__current-month--selected-day': markSelectedField(day)}"
-
-          @click="selectField(day)">
+          v-for="day in includePrevMonth"
+          @click="switchToPrevMonth"
+          :class="{'calendar__current-month--grayed-out': true,
+                   'calendar__current-month--single-event'
+                   : markSingleEvent(day, checkPrevMonth, checkPrevYear),
+                   'calendar__current-month--long-event'
+                   : markLongEvent(day, checkPrevMonth, checkPrevYear)}">
 
         {{ day }}
       </li>
+
+      <li class="calendar__current-month"
+          v-for="day in daysInMonth"
+          @click="selectField(day)"
+          :class="{'calendar__current-month--current-day': markToday(day),
+                   'calendar__current-month--single-event': markSingleEvent(day, month, year),
+                   'calendar__current-month--long-event': markLongEvent(day, month, year),
+                   'calendar__current-month--selected-day': markSelectedField(day)}">
+
+        {{ day }}
+      </li>
+
       <li class="calendar__current-month"
           v-for="day in includeNextMonth"
+          @click="switchToNextMonth"
           :class="{'calendar__current-month--grayed-out': true,
-                   'calendar__current-month--long-event-day': markLongEvent2(day)}">
+                   'calendar__current-month--single-event'
+                   : markSingleEvent(day, checkNextMonth, checkNextYear),
+                   'calendar__current-month--long-event'
+                   : markLongEvent(day, checkNextMonth, checkNextYear)}">
 
         {{ day }}
       </li>
@@ -72,19 +85,20 @@ export default {
     return {
       today: moment(),
       dateContext: moment(),
+      dateContextSupp: moment(),
       weekdays: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],
       selected: {
         day: moment()
           .get('date'),
         month: moment()
-          .format('MMMM'),
+          .format('MM'),
         year: moment()
           .format('Y'),
       },
     };
   },
   mounted() {
-    this.$store.state.selectedDate = `${this.initialYear}-${this.dateContext.format('M')}-${this.initialDate}`;
+    this.$store.state.selectedDate = `${this.selected.year}-${this.selected.month}-${this.selected.day}`;
   },
   computed: {
     initialYear() {
@@ -102,6 +116,9 @@ export default {
     month() {
       return this.dateContext.format('MM');
     },
+    monthName() {
+      return this.dateContext.format('MMMM');
+    },
     date() {
       return this.dateContext.get('date');
     },
@@ -109,46 +126,65 @@ export default {
       return this.dateContext.daysInMonth();
     },
     includePrevMonth() {
-      return moment(this.dateContext)
+      const endOfPrevMonth = moment(this.dateContext)
+        .subtract(1, 'months')
+        .endOf('month')
+        .get('date');
+      const numberOfDays = moment(this.dateContext)
         .subtract((this.date - 1), 'days')
         .weekday();
+      const startDay = endOfPrevMonth - numberOfDays;
+      const days = [];
+      for (let i = startDay + 1; i <= endOfPrevMonth; i++) {
+        days.push(i);
+      }
+      return days;
     },
     includeNextMonth() {
       const calendarFields = 42;
-      return calendarFields - (this.daysInMonth + this.includePrevMonth);
+      return calendarFields - (this.daysInMonth + this.includePrevMonth.length);
+    },
+    checkPrevMonth() {
+      const prevMonth = parseInt(this.month, 10) - 1;
+      return prevMonth === 0 ? 12 : prevMonth;
+    },
+    checkNextMonth() {
+      const nextMonth = parseInt(this.month, 10) + 1;
+      return nextMonth === 13 ? 1 : nextMonth;
+    },
+    checkPrevYear() {
+      const year = parseInt(this.year, 10);
+      return this.checkPrevMonth === 12 ? year - 1 : year;
+    },
+    checkNextYear() {
+      const year = parseInt(this.year, 10);
+      return this.checkNextMonth === 1 ? year + 1 : year;
     },
   },
   methods: {
-    nextMonth() {
+    switchToNextMonth() {
       this.dateContext = moment(this.dateContext)
         .add(1, 'month');
     },
-    previousMonth() {
+    switchToPrevMonth() {
       this.dateContext = moment(this.dateContext)
         .subtract(1, 'month');
     },
     markToday(day) {
       return this.initialDate === day
-        && this.initialMonth === this.month
+        && this.initialMonth === this.monthName
         && this.initialYear === this.year;
     },
-    markSingleEvent(day) {
+    markSingleEvent(day, month, year) {
       const { events } = this.$store.state;
-      const fullDate = `${this.year}-${this.month}-${day}`;
+      const fullDate = `${year}-${month}-${day}`;
       const fieldEvents = events.filter(event => moment(fullDate)
         .isSame(event.date));
       return fieldEvents.length;
     },
-    markLongEvent(day) {
+    markLongEvent(day, month, year) {
       const { events } = this.$store.state;
-      const fullDate = `${this.year}-${this.month}-${day}`;
-      const fieldEvents = events.filter(event => moment(fullDate)
-        .isBetween(event.dateStart, event.dateEnd));
-      return fieldEvents.length;
-    },
-    markLongEvent2(day) {
-      const { events } = this.$store.state;
-      const fullDate = `${this.year}-${parseInt(this.month, 10) + 1}-${day}`;
+      const fullDate = `${year}-${month}-${day}`;
       const fieldEvents = events.filter(event => moment(fullDate)
         .isBetween(event.dateStart, event.dateEnd));
       return fieldEvents.length;
@@ -164,7 +200,7 @@ export default {
       this.selected.year = this.year;
       this.$store.commit('selectField', {
         year: this.year,
-        month: this.dateContext.format('M'),
+        month: this.month,
         day,
       });
     },
@@ -244,7 +280,6 @@ export default {
   }
 
   &__weekday-name,
-  &__another-month-day,
   &__current-month {
     height: 5rem;
     display: flex;
@@ -259,14 +294,9 @@ export default {
     margin: 0.25rem 0;
   }
 
-  &__another-month-day {
-    background-color: $grey-300;
-    opacity: 0.8;
-    margin: 0.25rem;
-  }
-
   &__current-month {
     margin: 0.25rem;
+    border: 1px solid $grey-300;
 
     &--current-day {
       position: relative;
@@ -285,10 +315,14 @@ export default {
       }
     }
 
-    &--event-day {
+    &--grayed-out {
+      opacity: 0.4;
+      margin: 0.25rem;
+      background-color: $grey-300;
+    }
+
+    &--single-event {
       position: relative;
-      background-color: $blue;
-      color: $white;
 
       &::after {
         content: '';
@@ -301,7 +335,6 @@ export default {
         position: absolute;
         bottom: 0.5rem;
         right: 0.5rem;
-        z-index: 1;
       }
     }
 
@@ -314,17 +347,10 @@ export default {
       border: 3px solid $mint;
     }
 
-    &--grayed-out {
-      opacity: 0.4;
-      margin: 0.25rem;
-      background-color: $grey-300;
-    }
-
-    &--long-event-day {
+    &--long-event {
       background-color: $purple;
       color: $white;
     }
   }
 }
-
 </style>
